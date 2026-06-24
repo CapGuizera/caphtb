@@ -1,0 +1,20 @@
+# Ambiente virtual
+.venv/
+venv/
+
+# Bytecode / cache
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Configuracao local (CONTEM O TOKEN - NUNCA versionar)
+config.json
+*.token
+.env
+
+# Editores
+.vscode/
+.idea/
+*.swp
