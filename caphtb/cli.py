@@ -421,6 +421,11 @@ def ranking(
     client = get_client()
     cfg = Config.load()
 
+    # Passing --country implies the country scope, so `ranking --country BR`
+    # works without having to also type the positional "country" argument.
+    if country and scope == "world":
+        scope = "country"
+
     if scope == "world":
         rows = guard(client.ranking_world)
         title = "World Ranking"
