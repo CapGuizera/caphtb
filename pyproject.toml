@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "caphtb"
 version = "1.0.0"
-description = "CLI bonita para a API do Hack The Box"
+description = "A pretty CLI for the Hack The Box API"
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [{ name = "0xCAPgz" }]

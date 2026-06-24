@@ -1,9 +1,9 @@
 # caphtb
 
-CLI bonita (e industrial) para a API v4 do **Hack The Box**, construida com
-`typer` + `rich`. Lista e controla maquinas, acompanha first bloods ao vivo,
-explora challenges (DFIR, Pwn, Forensics...) e mostra rankings mundial, por
-pais, por time e por universidade.
+A pretty (and industrial) CLI for the **Hack The Box** v4 API, built with
+`typer` + `rich`. List and control machines, track first bloods live, explore
+challenges (Forensics, Pwn, etc.) and Sherlocks (DFIR), and view world,
+country, team and university rankings.
 
 ```
   ___ __ _ _ __ | |__ | |_| |__
@@ -15,18 +15,18 @@ pais, por time e por universidade.
 
 ---
 
-## Instalacao rapida
+## Quick install
 
 ```bash
 chmod +x start.sh
-./start.sh            # cria .venv, instala tudo e mostra a ajuda
-./start.sh login      # cola seu App Token (fica salvo so localmente)
+./start.sh            # creates .venv, installs everything and shows the help
+./start.sh login      # paste your App Token (stored locally only)
 ```
 
-O `start.sh` cria um virtualenv isolado em `.venv/`, instala as dependencias
-e repassa qualquer argumento para o comando `caphtb`.
+`start.sh` creates an isolated virtualenv in `.venv/`, installs the
+dependencies and forwards any argument to the `caphtb` command.
 
-### Instalacao manual (opcional)
+### Manual install (optional)
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
@@ -34,118 +34,132 @@ pip install -e .
 caphtb --help
 ```
 
+### Call it from anywhere (symlink)
+
+After installing, symlink the entry point so you can run it as `caphtbcli`:
+
+```bash
+sudo ln -s "$(pwd)/.venv/bin/caphtb" /usr/local/bin/caphtbcli
+caphtbcli --help
+```
+
 ---
 
-## Autenticacao
+## Authentication
 
-1. Gere um **App Token** em <https://app.hackthebox.com/profile/settings>
-   (aba *App Tokens* / *Create App Token*).
-2. Rode `caphtb login` e cole o token. Ele e gravado em
-   `~/.config/caphtb/config.json` com permissao `0600`.
+1. Generate an **App Token** at <https://app.hackthebox.com/profile/settings>
+   (the *App Tokens* / *Create App Token* tab).
+2. Run `caphtb login` and paste the token. It is written to
+   `~/.config/caphtb/config.json` with permission `0600`.
 
-Alternativa sem gravar em disco: exporte `HTB_TOKEN`.
+Alternative without writing to disk: export `HTB_TOKEN`.
 
 ```bash
 export HTB_TOKEN="eyJ0eXAiOiJKV1Qi..."
 ```
 
-> O token e um segredo. Nunca o coloque em repositorio nem compartilhe.
-> O `.gitignore` ja bloqueia `config.json`, `.env` e `*.token`.
+> The token is a secret. Never put it in a repository or share it.
+> `.gitignore` already blocks `config.json`, `.env` and `*.token`.
 
 ---
 
-## Modo de uso
+## Usage
 
-Cada comando tem `--help` proprio (`caphtb machines --help`).
+Every command has its own `--help` (`caphtb machines --help`).
 
-### Perfil
+### Profile
 
-| Comando            | O que faz                                            |
+| Command            | What it does                                         |
 |--------------------|------------------------------------------------------|
-| `caphtb login`     | Salva e valida seu App Token                         |
-| `caphtb whoami`    | Seu perfil: rank, pontos, owns e time                |
-| `caphtb config`    | Mostra a config atual (sem revelar o token)          |
-| `caphtb version`   | Versao da ferramenta                                 |
+| `caphtb login`     | Save and validate your App Token                     |
+| `caphtb whoami`    | Your profile: rank, points, owns and team            |
+| `caphtb config`    | Show the current config (without revealing the token)|
+| `caphtb version`   | Tool version                                         |
 
-### Maquinas
+### Machines
 
 ```bash
-caphtb machines                       # ativas
-caphtb machines --retired             # aposentadas
-caphtb machines --os linux -d easy    # filtra OS e dificuldade
-caphtb machines --todo                # so as da sua lista de to-do
-caphtb machines --search lame         # busca por nome
-caphtb machine Lame                   # detalhe (id ou nome)
-caphtb active                         # qual maquina voce tem spawnada
-caphtb startingpoint 1                # starting point por tier
+caphtb machines                       # active
+caphtb machines --retired             # retired
+caphtb machines --os linux -d easy    # filter by OS and difficulty
+caphtb machines --todo                # only the ones in your to-do list
+caphtb machines --search lame         # search by name
+caphtb machine Lame                   # detail (id or name)
+caphtb active                         # which machine you have spawned
+caphtb startingpoint 1                # starting point by tier
 ```
 
-Filtros de `machines`: `--retired/-r`, `--os`, `--difficulty/-d`,
+`machines` filters: `--retired/-r`, `--os`, `--difficulty/-d`,
 `--todo`, `--search/-s`, `--limit/-n`.
 
-### Ciclo de vida da VM
+### VM lifecycle
 
 ```bash
-caphtb spawn Lame          # inicia (aceita id ou nome)
-caphtb active              # ver o IP depois de alguns segundos
-caphtb stop                # desativa a maquina ativa
-caphtb stop Lame           # desativa uma especifica
-caphtb reset Lame          # reseta a instancia
-caphtb submit Lame "HTB{...}" -d 4   # envia flag (dificuldade 1-10)
+caphtb spawn Lame          # start (accepts id or name)
+caphtb active              # see the IP after a few seconds
+caphtb stop                # stop the active machine
+caphtb stop Lame           # stop a specific one
+caphtb reset Lame          # reset the instance
+caphtb submit Lame "HTB{...}" -d 4   # submit flag (difficulty 1-10)
 ```
 
-### Bloods e acompanhamento ao vivo
+### Bloods and live tracking
 
 ```bash
-caphtb bloods Lame                 # first bloods + top owns
-caphtb watch Lame                  # ATUALIZA SOZINHO e avisa o blood
-caphtb watch Lame --interval 15    # intervalo de polling em segundos
+caphtb bloods Lame                 # first bloods + own counters
+caphtb watch Lame                  # AUTO-REFRESHES and alerts on the blood
+caphtb watch Lame --interval 15    # polling interval in seconds
 ```
 
-O `watch` e feito para maquinas recem-lancadas: a tela se atualiza
-sozinha, e quando o **user blood** ou o **root blood** e capturado a
-ferramenta destaca em vermelho e toca o bell do terminal.
+`watch` is made for freshly released machines: the screen refreshes on its
+own, and when the **user blood** or **root blood** is taken, the tool
+highlights it in red and rings the terminal bell.
 
-### Challenges (inclui DFIR)
+### Challenges and DFIR (Sherlocks)
 
 ```bash
-caphtb challenges                          # ativos
-caphtb challenges -c DFIR                  # por categoria
-caphtb challenges -c Pwn -d hard --todo    # categoria + dificuldade + nao resolvidos
-caphtb challenges --retired                # aposentados
-caphtb dfir                                # atalho da categoria DFIR
-caphtb dfir --todo                         # DFIR ainda nao resolvidos
-caphtb categories                          # lista as categorias
-caphtb challenge 123                       # detalhe de um challenge
+caphtb challenges                          # active
+caphtb challenges -c Forensics             # by category
+caphtb challenges -c Pwn -d hard --todo    # category + difficulty + unsolved
+caphtb challenges --retired                # retired
+caphtb categories                          # list the categories
+caphtb challenge 123                       # challenge detail
 caphtb challenge-submit 123 "HTB{...}" -d 3
+
+caphtb dfir                                # Sherlocks (HTB DFIR)
+caphtb dfir --todo                         # unsolved Sherlocks
+caphtb sherlock 631                        # Sherlock detail
 ```
+
+> On HTB, **DFIR is the "Sherlocks" product** (blue team investigations),
+> not a challenge category, so `dfir` lists Sherlocks.
 
 ### Ranking
 
 ```bash
-caphtb ranking world                 # Hall of Fame mundial
-caphtb ranking country --country BR  # por pais (default: BR)
-caphtb ranking team                  # times
-caphtb ranking uni                   # universidades
-caphtb ranking world -n 50           # quantos linhas exibir
+caphtb ranking world                 # worldwide Hall of Fame
+caphtb ranking country --country BR  # by country (default: BR)
+caphtb ranking team                  # teams
+caphtb ranking uni                   # universities
+caphtb ranking world -n 50           # how many rows to show
 ```
 
 ---
 
-## Estrutura do projeto
+## Project structure
 
 ```
 caphtb_cli/
 ├── caphtb/
-│   ├── __init__.py     # metadados do pacote
-│   ├── __main__.py     # permite `python -m caphtb`
-│   ├── config.py       # token + config + leitura do JWT
-│   ├── api.py          # cliente HTTP da API v4 do HTB
-│   ├── ui.py           # tema, banner, tabelas e paineis (rich)
-│   └── cli.py          # comandos (typer)
+│   ├── __init__.py     # package metadata
+│   ├── __main__.py     # enables `python -m caphtb`
+│   ├── config.py       # token + config + JWT reading
+│   ├── api.py          # HTTP client for the HTB v4 API
+│   ├── ui.py           # theme, banner, tables and panels (rich)
+│   └── cli.py          # commands (typer)
 ├── requirements.txt
-├── pyproject.toml      # empacotamento + entrypoint `caphtb`
-├── start.sh            # instalador/lancador
+├── pyproject.toml      # packaging + `caphtb` entry point
+├── start.sh            # installer/launcher
 ├── .gitignore
 ├── LICENSE
 └── README.md
@@ -153,18 +167,21 @@ caphtb_cli/
 
 ---
 
-## Notas tecnicas
+## Technical notes
 
-- **Base da API:** `https://labs.hackthebox.com/api/v4`. Da para trocar
-  editando `base_url` no `config.json` caso o HTB mude o dominio.
-- **Id do usuario:** lido do claim `sub` do proprio JWT, sem chamada extra.
-- **Endpoints de challenge:** o HTB ja renomeou esses endpoints; o cliente
-  tenta o caminho novo (`/challenges`) e cai para o legado (`/challenge/list`).
-- **Rate limit:** chamadas em excesso retornam `429`; o `watch` usa polling
-  espacado (default 20s) justamente para nao bater no limite.
+- **API base:** `https://labs.hackthebox.com/api/v4`. You can change it by
+  editing `base_url` in `config.json` if HTB changes the domain.
+- **User id:** read from the `sub` claim of your own JWT, with no extra call.
+- **Challenge endpoints:** HTB has renamed these endpoints; the client tries
+  the new path (`/challenges`) and falls back to the legacy one
+  (`/challenge/list`).
+- **First bloods:** come from the machine profile itself
+  (`userBlood`/`rootBlood`), since the old top-owns endpoint was removed.
+- **Rate limit:** excessive calls return `429`; `watch` uses spaced polling
+  (default 20s) precisely to avoid hitting the limit.
 
 ---
 
-## Licenca
+## License
 
-MIT. Veja `LICENSE`.
+MIT. See `LICENSE`.

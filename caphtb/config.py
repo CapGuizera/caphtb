@@ -2,18 +2,18 @@
 config.py
 =========
 
-Gerencia a configuracao persistente da ferramenta:
+Manages the persistent configuration of the tool:
 
-  - token da API do HTB (App Token)
-  - URL base da API (caso o HTB mude o dominio)
-  - pais padrao para ranking (ex.: BR)
-  - id do time padrao para ranking de time
+  - HTB API token (App Token)
+  - API base URL (in case HTB changes the domain)
+  - default country for rankings (e.g. BR)
+  - default team id for team rankings
 
-A configuracao fica em ~/.config/caphtb/config.json com permissao 0600
-(somente o dono le/escreve), porque o token e um segredo.
+The configuration lives in ~/.config/caphtb/config.json with permission 0600
+(owner read/write only), because the token is a secret.
 
-Tambem da pra sobrescrever o token via variavel de ambiente HTB_TOKEN,
-util para CI ou para nao gravar nada em disco.
+You can also override the token via the HTB_TOKEN environment variable, which
+is handy for CI or when you do not want to write anything to disk.
 """
 
 from __future__ import annotations
@@ -26,30 +26,30 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Optional
 
-# Diretorio e arquivo de configuracao seguindo o padrao XDG.
+# Config directory and file following the XDG standard.
 CONFIG_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "caphtb"
 CONFIG_FILE = CONFIG_DIR / "config.json"
 
-# URL base padrao da API v4 do Hack The Box.
+# Default base URL of the Hack The Box v4 API.
 DEFAULT_BASE_URL = "https://labs.hackthebox.com/api/v4"
 
 
 @dataclass
 class Config:
-    """Estrutura tipada da configuracao da ferramenta."""
+    """Typed representation of the tool configuration."""
 
     token: str = ""
     base_url: str = DEFAULT_BASE_URL
-    country: str = "BR"          # codigo ISO usado no ranking por pais
-    team_id: Optional[int] = None  # id do time para o ranking de time
+    country: str = "BR"          # ISO code used by the country ranking
+    team_id: Optional[int] = None  # team id used by the team ranking
     extra: dict[str, Any] = field(default_factory=dict)
 
     # ------------------------------------------------------------------ #
-    # Carregamento / gravacao
+    # Loading / saving
     # ------------------------------------------------------------------ #
     @classmethod
     def load(cls) -> "Config":
-        """Le a config do disco (se existir) e aplica overrides de ambiente."""
+        """Read the config from disk (if any) and apply environment overrides."""
         data: dict[str, Any] = {}
         if CONFIG_FILE.exists():
             try:
@@ -65,7 +65,7 @@ class Config:
             extra=data.get("extra", {}) or {},
         )
 
-        # A variavel de ambiente sempre vence o que esta gravado em disco.
+        # The environment variable always wins over what is stored on disk.
         env_token = os.environ.get("HTB_TOKEN")
         if env_token:
             cfg.token = env_token.strip()
@@ -73,18 +73,18 @@ class Config:
         return cfg
 
     def save(self) -> None:
-        """Grava a config no disco com permissao restrita (0600)."""
+        """Write the config to disk with restricted permission (0600)."""
         CONFIG_DIR.mkdir(parents=True, exist_ok=True)
         payload = asdict(self)
         CONFIG_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
         try:
             os.chmod(CONFIG_FILE, 0o600)
         except OSError:
-            # Em alguns sistemas de arquivos chmod pode falhar; nao e fatal.
+            # On some filesystems chmod may fail; this is not fatal.
             pass
 
     # ------------------------------------------------------------------ #
-    # Utilidades de token
+    # Token helpers
     # ------------------------------------------------------------------ #
     @property
     def has_token(self) -> bool:
@@ -92,15 +92,15 @@ class Config:
 
     def jwt_claims(self) -> dict[str, Any]:
         """
-        Decodifica (sem validar assinatura) o payload do JWT para extrair
-        claims uteis como `sub` (id do usuario) e `exp` (expiracao).
+        Decode (without verifying the signature) the JWT payload to extract
+        useful claims such as `sub` (user id) and `exp` (expiry).
 
-        Nao verificamos a assinatura porque nao temos a chave publica e
-        so queremos ler metadados do nosso proprio token.
+        We do not verify the signature because we do not have the public key
+        and we only want to read metadata from our own token.
         """
         try:
             payload_b64 = self.token.split(".")[1]
-            # base64url precisa de padding multiplo de 4.
+            # base64url needs padding to a multiple of 4.
             payload_b64 += "=" * (-len(payload_b64) % 4)
             raw = base64.urlsafe_b64decode(payload_b64)
             return json.loads(raw)
@@ -109,7 +109,7 @@ class Config:
 
     @property
     def user_id(self) -> Optional[int]:
-        """Id do usuario dono do token, lido do claim `sub`."""
+        """Id of the user who owns the token, read from the `sub` claim."""
         claims = self.jwt_claims()
         sub = claims.get("sub")
         try:
@@ -118,7 +118,7 @@ class Config:
             return None
 
     def token_expires_in_days(self) -> Optional[float]:
-        """Quantos dias faltam para o token expirar (None se nao der pra ler)."""
+        """Days left before the token expires (None if it cannot be read)."""
         claims = self.jwt_claims()
         exp = claims.get("exp")
         if not exp:

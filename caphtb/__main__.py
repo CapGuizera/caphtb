@@ -1,4 +1,4 @@
-"""Permite rodar a ferramenta com `python -m caphtb`."""
+"""Allows running the tool with `python -m caphtb`."""
 
 from .cli import main
 

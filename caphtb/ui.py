@@ -2,16 +2,16 @@
 ui.py
 =====
 
-Camada de apresentacao construida sobre a biblioteca `rich`.
+Presentation layer built on top of the `rich` library.
 
-Concentra TODO o visual da ferramenta aqui para manter o cli.py limpo:
-  - tema de cores (verde HTB #9FEF00 sobre fundo escuro);
-  - banner ASCII;
-  - tabelas de maquinas / challenges / ranking;
-  - paineis de detalhe e de bloods.
+All the visuals of the tool live here to keep cli.py clean:
+  - color theme (HTB green #9FEF00 on a dark background);
+  - ASCII banner;
+  - machine / challenge / ranking tables;
+  - detail and bloods panels.
 
-Sem emojis (preferencia do projeto): usamos cor, negrito e caracteres de
-caixa do proprio rich para o visual "industrial".
+No emojis (project preference): we rely on color, bold and rich's own box
+characters for the "industrial" look.
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ from rich.table import Table
 from rich.text import Text
 from rich.theme import Theme
 
-# Paleta inspirada no Hack The Box.
+# Palette inspired by Hack The Box.
 HTB_GREEN = "#9FEF00"
 HTB_DIM = "#5c6c0a"
 HTB_BG = "#111927"
@@ -48,7 +48,7 @@ THEME = Theme(
 
 console = Console(theme=THEME, highlight=False)
 
-# Logo ASCII (industrial, sem emoji).
+# ASCII logo (industrial, no emoji).
 BANNER = r"""
   ___ __ _ _ __ | |__ | |_| |__
  / __/ _` | '_ \| '_ \| __| '_ \
@@ -59,7 +59,7 @@ BANNER = r"""
 
 
 # ---------------------------------------------------------------------- #
-# Helpers de saida simples
+# Simple output helpers
 # ---------------------------------------------------------------------- #
 def banner() -> None:
     console.print(Text(BANNER, style="head"))
@@ -82,10 +82,10 @@ def info(msg: str) -> None:
 
 
 # ---------------------------------------------------------------------- #
-# Formatadores
+# Formatters
 # ---------------------------------------------------------------------- #
 def difficulty_style(text: Optional[str]) -> str:
-    """Mapeia o texto de dificuldade para um estilo de cor."""
+    """Map the difficulty text to a color style."""
     t = (text or "").lower()
     if "easy" in t:
         return "easy"
@@ -116,22 +116,22 @@ def os_short(os_name: Optional[str]) -> str:
 
 
 def yesno(value: Any) -> Text:
-    return Text("sim", style="ok") if value else Text("nao", style="muted")
+    return Text("yes", style="ok") if value else Text("no", style="muted")
 
 
 def fmt_dt(value: Optional[str]) -> str:
-    """Formata uma data ISO do HTB para algo curto e legivel."""
+    """Format an HTB ISO date into something short and readable."""
     if not value:
         return "-"
     try:
         dt = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
-        return dt.strftime("%d/%m/%Y %H:%M")
+        return dt.strftime("%Y-%m-%d %H:%M")
     except (ValueError, TypeError):
         return str(value)[:16]
 
 
 def ago(value: Optional[str]) -> str:
-    """Tempo decorrido desde uma data ISO (ex.: '2h 13m')."""
+    """Elapsed time since an ISO date (e.g. '2h 13m')."""
     if not value:
         return "-"
     try:
@@ -155,7 +155,7 @@ def ago(value: Optional[str]) -> str:
 
 
 # ---------------------------------------------------------------------- #
-# Tabelas
+# Tables
 # ---------------------------------------------------------------------- #
 def _base_table(title: str) -> Table:
     table = Table(
@@ -169,16 +169,16 @@ def _base_table(title: str) -> Table:
     return table
 
 
-def machines_table(machines: list[dict], title: str = "Maquinas") -> Table:
+def machines_table(machines: list[dict], title: str = "Machines") -> Table:
     table = _base_table(title)
     table.add_column("ID", justify="right", style="muted")
-    table.add_column("Nome", style="bold")
+    table.add_column("Name", style="bold")
     table.add_column("OS")
-    table.add_column("Dificuldade")
+    table.add_column("Difficulty")
     table.add_column("Pts", justify="right")
     table.add_column("User", justify="right", style="muted")
     table.add_column("Root", justify="right", style="muted")
-    table.add_column("Feito", justify="center")
+    table.add_column("Done", justify="center")
 
     for m in machines:
         done = m.get("authUserInRootOwns") or m.get("authUserInUserOwns")
@@ -198,12 +198,12 @@ def machines_table(machines: list[dict], title: str = "Maquinas") -> Table:
 def challenges_table(challenges: list[dict], title: str = "Challenges") -> Table:
     table = _base_table(title)
     table.add_column("ID", justify="right", style="muted")
-    table.add_column("Nome", style="bold")
-    table.add_column("Categoria")
-    table.add_column("Dificuldade")
+    table.add_column("Name", style="bold")
+    table.add_column("Category")
+    table.add_column("Difficulty")
     table.add_column("Pts", justify="right")
     table.add_column("Solves", justify="right", style="muted")
-    table.add_column("Feito", justify="center")
+    table.add_column("Done", justify="center")
 
     for c in challenges:
         cat = c.get("category_name") or c.get("category") or "-"
@@ -223,10 +223,10 @@ def challenges_table(challenges: list[dict], title: str = "Challenges") -> Table
 def ranking_table(rows: list[dict], title: str) -> Table:
     table = _base_table(title)
     table.add_column("#", justify="right", style="head")
-    table.add_column("Nome", style="bold")
+    table.add_column("Name", style="bold")
     table.add_column("Rank", style="muted")
-    table.add_column("Pontos", justify="right")
-    table.add_column("Pais/Time", style="muted")
+    table.add_column("Points", justify="right")
+    table.add_column("Country/Team", style="muted")
 
     for i, r in enumerate(rows, start=1):
         rank_pos = r.get("rank") or r.get("ranking") or i
@@ -245,12 +245,12 @@ def ranking_table(rows: list[dict], title: str) -> Table:
 def sherlocks_table(items: list[dict], title: str = "Sherlocks (DFIR)") -> Table:
     table = _base_table(title)
     table.add_column("ID", justify="right", style="muted")
-    table.add_column("Nome", style="bold")
-    table.add_column("Categoria")
-    table.add_column("Dificuldade")
+    table.add_column("Name", style="bold")
+    table.add_column("Category")
+    table.add_column("Difficulty")
     table.add_column("Solves", justify="right", style="muted")
     table.add_column("Rating", justify="right", style="muted")
-    table.add_column("Feito", justify="center")
+    table.add_column("Done", justify="center")
 
     for s in items:
         done = s.get("is_owned")
@@ -267,7 +267,7 @@ def sherlocks_table(items: list[dict], title: str = "Sherlocks (DFIR)") -> Table
 
 
 # ---------------------------------------------------------------------- #
-# Paineis de detalhe
+# Detail panels
 # ---------------------------------------------------------------------- #
 def machine_panel(m: dict) -> Panel:
     ub = m.get("userBlood") or m.get("user_blood") or {}
@@ -279,21 +279,21 @@ def machine_panel(m: dict) -> Panel:
     body.append(f"{m.get('name', '-')}", style="head")
     body.append(f"   #{m.get('id', '-')}\n", style="muted")
     body.append("OS:           ", style="muted"); body.append(f"{os_short(m.get('os'))}\n")
-    body.append("Dificuldade:  ", style="muted"); body.append_text(diff_cell(m.get("difficultyText"))); body.append("\n")
-    body.append("Pontos:       ", style="muted"); body.append(f"{m.get('points', '-')}\n")
-    body.append("Rating:       ", style="muted"); body.append(f"{m.get('stars', '-')} estrelas\n")
-    body.append("IP:           ", style="muted"); body.append(f"{m.get('ip') or 'nao spawnada'}\n")
-    body.append("Lancamento:   ", style="muted"); body.append(f"{fmt_dt(m.get('release'))}\n")
+    body.append("Difficulty:   ", style="muted"); body.append_text(diff_cell(m.get("difficultyText"))); body.append("\n")
+    body.append("Points:       ", style="muted"); body.append(f"{m.get('points', '-')}\n")
+    body.append("Rating:       ", style="muted"); body.append(f"{m.get('stars', '-')} stars\n")
+    body.append("IP:           ", style="muted"); body.append(f"{m.get('ip') or 'not spawned'}\n")
+    body.append("Release:      ", style="muted"); body.append(f"{fmt_dt(m.get('release'))}\n")
     body.append("User owns:    ", style="muted"); body.append(f"{m.get('user_owns_count', '-')}\n")
     body.append("Root owns:    ", style="muted"); body.append(f"{m.get('root_owns_count', '-')}\n")
     body.append("User blood:   ", style="muted"); body.append(f"{blood_user or '-'}\n", style="blood" if blood_user else "muted")
     body.append("Root blood:   ", style="muted"); body.append(f"{blood_root or '-'}", style="blood" if blood_root else "muted")
 
-    return Panel(body, border_style=HTB_GREEN, title="Maquina", title_align="left")
+    return Panel(body, border_style=HTB_GREEN, title="Machine", title_align="left")
 
 
 def bloods_panel(m: dict) -> Panel:
-    """Painel com os first bloods (user/root) e contadores de owns."""
+    """Panel with the first bloods (user/root) and own counters."""
     ub = m.get("userBlood") or m.get("user_blood") or {}
     rb = m.get("rootBlood") or m.get("root_blood") or {}
 
@@ -307,26 +307,26 @@ def bloods_panel(m: dict) -> Panel:
     body.append("  User: ", style="muted")
     if u_name:
         body.append(f"{u_name} ", style="blood")
-        body.append(f"em {ub.get('blood_difference', '?')}  ({fmt_dt(ub.get('created_at'))})\n", style="muted")
+        body.append(f"in {ub.get('blood_difference', '?')}  ({fmt_dt(ub.get('created_at'))})\n", style="muted")
     else:
-        body.append("ainda nao capturado\n", style="warn")
+        body.append("not captured yet\n", style="warn")
 
     r_name = (rb.get("user") or {}).get("name")
     body.append("  Root: ", style="muted")
     if r_name:
         body.append(f"{r_name} ", style="blood")
-        body.append(f"em {rb.get('blood_difference', '?')}  ({fmt_dt(rb.get('created_at'))})\n", style="muted")
+        body.append(f"in {rb.get('blood_difference', '?')}  ({fmt_dt(rb.get('created_at'))})\n", style="muted")
     else:
-        body.append("ainda nao capturado\n", style="warn")
+        body.append("not captured yet\n", style="warn")
 
     body.append("\nOWNS\n", style="head")
     body.append("  User owns: ", style="muted"); body.append(f"{m.get('user_owns_count', '-')}\n")
     body.append("  Root owns: ", style="muted"); body.append(f"{m.get('root_owns_count', '-')}\n")
-    body.append("  Voce:      ", style="muted")
+    body.append("  You:       ", style="muted")
     you_u = "user" if m.get("authUserInUserOwns") else None
     you_r = "root" if m.get("authUserInRootOwns") else None
-    owned = " + ".join([x for x in (you_u, you_r) if x]) or "nenhum"
+    owned = " + ".join([x for x in (you_u, you_r) if x]) or "none"
     body.append(f"{owned}\n", style="ok" if (you_u or you_r) else "muted")
-    body.append("  Lancamento: ", style="muted"); body.append(f"{fmt_dt(m.get('release'))} ({ago(m.get('release'))} atras)")
+    body.append("  Release:   ", style="muted"); body.append(f"{fmt_dt(m.get('release'))} ({ago(m.get('release'))} ago)")
 
     return Panel(body, border_style=HTB_GREEN, title="Bloods", title_align="left")

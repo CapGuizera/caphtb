@@ -1,4 +1,4 @@
-# Ambiente virtual
+# Virtual environment
 .venv/
 venv/
 
@@ -9,12 +9,12 @@ __pycache__/
 build/
 dist/
 
-# Configuracao local (CONTEM O TOKEN - NUNCA versionar)
+# Local configuration (CONTAINS THE TOKEN - NEVER commit)
 config.json
 *.token
 .env
 
-# Editores
+# Editors
 .vscode/
 .idea/
 *.swp
