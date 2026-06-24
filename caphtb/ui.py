@@ -207,7 +207,7 @@ def challenges_table(challenges: list[dict], title: str = "Challenges") -> Table
 
     for c in challenges:
         cat = c.get("category_name") or c.get("category") or "-"
-        done = c.get("authUserSolve") or c.get("isCompleted") or c.get("solved")
+        done = c.get("is_owned") or c.get("authUserSolve") or c.get("isCompleted") or c.get("solved")
         table.add_row(
             str(c.get("id", "-")),
             c.get("name", "-"),

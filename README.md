@@ -81,6 +81,8 @@ Every command has its own `--help` (`caphtb machines --help`).
 ```bash
 caphtb machines                       # active
 caphtb machines --retired             # retired
+caphtb machines --retired --done      # retired ones you have owned
+caphtb machines --retired --undone    # retired ones you have NOT owned
 caphtb machines --os linux -d easy    # filter by OS and difficulty
 caphtb machines --todo                # only the ones in your to-do list
 caphtb machines --search lame         # search by name
@@ -89,8 +91,8 @@ caphtb active                         # which machine you have spawned
 caphtb startingpoint 1                # starting point by tier
 ```
 
-`machines` filters: `--retired/-r`, `--os`, `--difficulty/-d`,
-`--todo`, `--search/-s`, `--limit/-n`.
+`machines` filters: `--retired/-r`, `--done/-D`, `--undone/-u`, `--os`,
+`--difficulty/-d`, `--todo` (HTB to-do list), `--search/-s`, `--limit/-n`.
 
 ### VM lifecycle
 
@@ -120,16 +122,22 @@ highlights it in red and rings the terminal bell.
 ```bash
 caphtb challenges                          # active
 caphtb challenges -c Forensics             # by category
-caphtb challenges -c Pwn -d hard --todo    # category + difficulty + unsolved
-caphtb challenges --retired                # retired
+caphtb challenges -c Pwn -d hard --undone  # category + difficulty + unsolved
+caphtb challenges --retired --done         # retired ones you have solved
 caphtb categories                          # list the categories
 caphtb challenge 123                       # challenge detail
 caphtb challenge-submit 123 "HTB{...}" -d 3
 
 caphtb dfir                                # Sherlocks (HTB DFIR)
-caphtb dfir --todo                         # unsolved Sherlocks
+caphtb dfir --retired                      # only retired Sherlocks
+caphtb dfir --active --undone              # active Sherlocks you have not solved
+caphtb dfir --done                         # solved Sherlocks
 caphtb sherlock 631                        # Sherlock detail
 ```
+
+Done/undone filters work the same way on `challenges` and `dfir`:
+`--done/-D` (solved) and `--undone/-u` (unsolved). On `dfir` you also get
+`--retired/-r` and `--active/-a`.
 
 > On HTB, **DFIR is the "Sherlocks" product** (blue team investigations),
 > not a challenge category, so `dfir` lists Sherlocks.

@@ -142,6 +142,8 @@ def machines(
     retired: bool = typer.Option(False, "--retired", "-r", help="List retired machines."),
     os_filter: Optional[str] = typer.Option(None, "--os", help="Filter by OS (linux/windows)."),
     difficulty: Optional[str] = typer.Option(None, "--difficulty", "-d", help="easy/medium/hard/insane."),
+    done: bool = typer.Option(False, "--done", "-D", help="Only the ones you have owned."),
+    undone: bool = typer.Option(False, "--undone", "-u", help="Only the ones you have NOT owned."),
     todo: bool = typer.Option(False, "--todo", help="Only the ones in your to-do list."),
     search: Optional[str] = typer.Option(None, "--search", "-s", help="Filter by name."),
     limit: int = typer.Option(40, "--limit", "-n", help="Maximum number shown."),
@@ -152,6 +154,10 @@ def machines(
 
     if todo:
         data = [m for m in data if m.get("isTodo")]
+    if done:
+        data = [m for m in data if _machine_done(m)]
+    if undone:
+        data = [m for m in data if not _machine_done(m)]
     if os_filter:
         data = [m for m in data if os_filter.lower() in (m.get("os") or "").lower()]
     if difficulty:
@@ -161,6 +167,21 @@ def machines(
 
     title = f"{'Retired' if retired else 'Active'} machines ({len(data)})"
     ui.console.print(ui.machines_table(data[:limit], title))
+
+
+def _machine_done(m: dict) -> bool:
+    """A machine counts as done if you have owned user or root."""
+    return bool(m.get("authUserInRootOwns") or m.get("authUserInUserOwns"))
+
+
+def _solved(item: dict) -> bool:
+    """Whether a challenge/sherlock has been solved by the user."""
+    return bool(
+        item.get("is_owned")
+        or item.get("authUserSolve")
+        or item.get("isCompleted")
+        or item.get("solved")
+    )
 
 
 @app.command()
@@ -301,11 +322,12 @@ def challenges(
     category: Optional[str] = typer.Option(None, "--category", "-c", help="Category (e.g. Pwn, Web)."),
     difficulty: Optional[str] = typer.Option(None, "--difficulty", "-d", help="easy/medium/hard/insane."),
     retired: bool = typer.Option(False, "--retired", "-r", help="List retired challenges."),
-    todo: bool = typer.Option(False, "--todo", help="Only the unsolved ones."),
+    done: bool = typer.Option(False, "--done", "-D", help="Only the solved ones."),
+    undone: bool = typer.Option(False, "--undone", "-u", "--todo", help="Only the unsolved ones."),
     search: Optional[str] = typer.Option(None, "--search", "-s", help="Filter by name."),
     limit: int = typer.Option(40, "--limit", "-n", help="Maximum number shown."),
 ):
-    """List challenges with filters (category, difficulty, etc.)."""
+    """List challenges with filters (category, difficulty, done/undone, etc.)."""
     client = get_client()
     data = guard(lambda: client.challenges(retired=retired))
 
@@ -313,8 +335,10 @@ def challenges(
         data = [c for c in data if category.lower() in str(c.get("category_name") or c.get("category") or "").lower()]
     if difficulty:
         data = [c for c in data if difficulty.lower() in (c.get("difficulty") or "").lower()]
-    if todo:
-        data = [c for c in data if not (c.get("authUserSolve") or c.get("isCompleted") or c.get("solved"))]
+    if done:
+        data = [c for c in data if _solved(c)]
+    if undone:
+        data = [c for c in data if not _solved(c)]
     if search:
         data = [c for c in data if search.lower() in (c.get("name") or "").lower()]
 
@@ -324,7 +348,10 @@ def challenges(
 @app.command()
 def dfir(
     difficulty: Optional[str] = typer.Option(None, "--difficulty", "-d", help="easy/medium/hard/insane."),
-    todo: bool = typer.Option(False, "--todo", help="Only the unsolved ones."),
+    retired: bool = typer.Option(False, "--retired", "-r", help="Only retired Sherlocks."),
+    active: bool = typer.Option(False, "--active", "-a", help="Only active Sherlocks."),
+    done: bool = typer.Option(False, "--done", "-D", help="Only the solved ones."),
+    undone: bool = typer.Option(False, "--undone", "-u", "--todo", help="Only the unsolved ones."),
     search: Optional[str] = typer.Option(None, "--search", "-s", help="Filter by name."),
     limit: int = typer.Option(40, "--limit", "-n"),
 ):
@@ -333,8 +360,14 @@ def dfir(
     data = guard(client.sherlocks)
     if difficulty:
         data = [s for s in data if difficulty.lower() in (s.get("difficulty") or "").lower()]
-    if todo:
-        data = [s for s in data if not s.get("is_owned")]
+    if retired:
+        data = [s for s in data if "retired" in (s.get("state") or "").lower()]
+    if active:
+        data = [s for s in data if (s.get("state") or "").lower() == "active"]
+    if done:
+        data = [s for s in data if _solved(s)]
+    if undone:
+        data = [s for s in data if not _solved(s)]
     if search:
         data = [s for s in data if search.lower() in (s.get("name") or "").lower()]
     ui.console.print(ui.sherlocks_table(data[:limit], f"Sherlocks - DFIR ({len(data)})"))
