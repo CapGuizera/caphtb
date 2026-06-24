@@ -469,6 +469,12 @@ def ranking(
     elif scope == "team":
         rows = guard(client.ranking_teams)
         title = "Team Ranking"
+        # The team ranking is global, but each team carries a country code,
+        # so --country filters it client-side (e.g. only Brazilian teams).
+        if country:
+            code = country.upper()
+            rows = [t for t in rows if (t.get("country") or "").upper() == code]
+            title = f"Team Ranking - {code}"
     elif scope in ("uni", "university", "universities"):
         rows = guard(client.ranking_universities)
         title = "University Ranking"

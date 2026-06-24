@@ -146,8 +146,9 @@ Done/undone filters work the same way on `challenges` and `dfir`:
 
 ```bash
 caphtb ranking world                 # worldwide Hall of Fame
-caphtb ranking country --country BR  # by country (default: BR)
-caphtb ranking team                  # teams
+caphtb ranking --country BR          # users by country (--country implies country scope)
+caphtb ranking team                  # teams (global)
+caphtb ranking team --country BR     # only Brazilian teams (keeps global rank)
 caphtb ranking uni                   # universities
 caphtb ranking world -n 50           # how many rows to show
 ```
