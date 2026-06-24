@@ -471,10 +471,16 @@ def ranking(
         title = "Team Ranking"
         # The team ranking is global, but each team carries a country code,
         # so --country filters it client-side (e.g. only Brazilian teams).
+        # HTB only exposes the global top ~100 teams: there is no per-country
+        # team endpoint, so only top-100 teams from that country show up.
         if country:
             code = country.upper()
             rows = [t for t in rows if (t.get("country") or "").upper() == code]
             title = f"Team Ranking - {code}"
+            ui.warn(
+                f"HTB only exposes the global top ~100 teams, so this shows only "
+                f"{code} teams within that top 100 (not every {code} team)."
+            )
     elif scope in ("uni", "university", "universities"):
         rows = guard(client.ranking_universities)
         title = "University Ranking"

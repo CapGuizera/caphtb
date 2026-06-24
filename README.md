@@ -148,10 +148,15 @@ Done/undone filters work the same way on `challenges` and `dfir`:
 caphtb ranking world                 # worldwide Hall of Fame
 caphtb ranking --country BR          # users by country (--country implies country scope)
 caphtb ranking team                  # teams (global)
-caphtb ranking team --country BR     # only Brazilian teams (keeps global rank)
+caphtb ranking team --country BR     # Brazilian teams within the global top 100 *
 caphtb ranking uni                   # universities
 caphtb ranking world -n 50           # how many rows to show
 ```
+
+> \* HTB does not expose a per-country team ranking; the only team endpoint is
+> the global top ~100. So `ranking team --country BR` only shows the BR teams
+> that are inside that global top 100, not every Brazilian team. The tool warns
+> you about this when you use it.
 
 ---
 
