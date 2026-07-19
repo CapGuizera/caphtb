@@ -62,8 +62,9 @@ class HTBClient:
         *,
         params: Optional[dict[str, Any]] = None,
         json_body: Optional[dict[str, Any]] = None,
+        base_url: Optional[str] = None,
     ) -> Any:
-        url = f"{self.cfg.base_url}{path}"
+        url = f"{base_url or self.cfg.base_url}{path}"
         try:
             resp = self.session.request(
                 method,
@@ -106,8 +107,13 @@ class HTBClient:
         clean = {k: v for k, v in params.items() if v is not None}
         return self._request("GET", path, params=clean or None)
 
-    def _post(self, path: str, body: Optional[dict[str, Any]] = None) -> Any:
-        return self._request("POST", path, json_body=body)
+    def _post(self, path: str, body: Optional[dict[str, Any]] = None, *, base_url: Optional[str] = None) -> Any:
+        return self._request("POST", path, json_body=body, base_url=base_url)
+
+    @property
+    def _v5_base(self) -> str:
+        """Base URL for endpoints that moved to the v5 API namespace."""
+        return self.cfg.base_url.replace("/api/v4", "/api/v5")
 
     @staticmethod
     def _unwrap(data: Any, *keys: str) -> Any:
@@ -210,10 +216,14 @@ class HTBClient:
         return self._post("/vm/reset", {"machine_id": machine_id})
 
     def submit_machine_flag(self, machine_id: int, flag: str, difficulty: int) -> dict[str, Any]:
-        # difficulty: 1..10 (10 = very hard), required by the API.
+        # The CLI takes a 1..10 star rating; the HTB API expects it on a
+        # 10..100 scale (multiples of 10), so scale it up here.
+        # Machine flag submission was migrated to the v5 API namespace
+        # (v4 /machine/own now returns 404 "route could not be found").
         return self._post(
             "/machine/own",
-            {"flag": flag, "id": machine_id, "difficulty": difficulty},
+            {"flag": flag, "id": machine_id, "difficulty": difficulty * 10},
+            base_url=self._v5_base,
         )
 
     def todo_machines(self) -> list[dict]:
@@ -257,9 +267,10 @@ class HTBClient:
         return self._post("/challenge/stop", {"challenge_id": challenge_id})
 
     def submit_challenge_flag(self, challenge_id: int, flag: str, difficulty: int) -> dict[str, Any]:
+        # Same 1..10 -> 10..100 scaling as machine flags.
         return self._post(
             "/challenge/own",
-            {"flag": flag, "challenge_id": challenge_id, "difficulty": difficulty},
+            {"flag": flag, "challenge_id": challenge_id, "difficulty": difficulty * 10},
         )
 
     # ================================================================== #

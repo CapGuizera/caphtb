@@ -146,6 +146,9 @@ def machines(
     undone: bool = typer.Option(False, "--undone", "-u", help="Only the ones you have NOT owned."),
     todo: bool = typer.Option(False, "--todo", help="Only the ones in your to-do list."),
     search: Optional[str] = typer.Option(None, "--search", "-s", help="Filter by name."),
+    min_rating: Optional[float] = typer.Option(None, "--min-rating", help="Only machines with rating >= this value (0-5)."),
+    sort: Optional[str] = typer.Option(None, "--sort", help="Sort by: rating, points, difficulty, name, user, root."),
+    asc: bool = typer.Option(False, "--asc", help="Sort ascending (default is descending)."),
     limit: int = typer.Option(40, "--limit", "-n", help="Maximum number shown."),
 ):
     """List active machines (or retired with --retired), with filters."""
@@ -164,9 +167,42 @@ def machines(
         data = [m for m in data if difficulty.lower() in (m.get("difficultyText") or "").lower()]
     if search:
         data = [m for m in data if search.lower() in (m.get("name") or "").lower()]
+    if min_rating is not None:
+        data = [m for m in data if _machine_rating(m) >= min_rating]
+
+    if sort:
+        data = _sort_machines(data, sort, asc)
 
     title = f"{'Retired' if retired else 'Active'} machines ({len(data)})"
     ui.console.print(ui.machines_table(data[:limit], title))
+
+
+def _machine_rating(m: dict) -> float:
+    try:
+        return float(m.get("star"))
+    except (TypeError, ValueError):
+        return 0.0
+
+
+_MACHINE_SORT_KEYS = {
+    "rating": lambda m: _machine_rating(m),
+    "points": lambda m: m.get("points") or m.get("static_points") or 0,
+    "difficulty": lambda m: m.get("difficulty") or 0,
+    "name": lambda m: (m.get("name") or "").lower(),
+    "user": lambda m: m.get("user_owns_count") or 0,
+    "root": lambda m: m.get("root_owns_count") or 0,
+}
+
+
+def _sort_machines(data: list[dict], sort: str, asc: bool) -> list[dict]:
+    key = _MACHINE_SORT_KEYS.get(sort.lower())
+    if key is None:
+        allowed = ", ".join(_MACHINE_SORT_KEYS)
+        ui.err(f"Invalid --sort value '{sort}'. Choose one of: {allowed}.")
+        raise typer.Exit(code=1)
+    # Name sorts A->Z by default; the rest default to highest-first.
+    reverse = asc if sort.lower() == "name" else not asc
+    return sorted(data, key=key, reverse=reverse)
 
 
 def _machine_done(m: dict) -> bool:

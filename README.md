@@ -86,13 +86,17 @@ caphtb machines --retired --undone    # retired ones you have NOT owned
 caphtb machines --os linux -d easy    # filter by OS and difficulty
 caphtb machines --todo                # only the ones in your to-do list
 caphtb machines --search lame         # search by name
+caphtb machines --sort rating         # sort by community rating (highest first)
+caphtb machines --min-rating 4.5      # only well-rated machines
 caphtb machine Lame                   # detail (id or name)
 caphtb active                         # which machine you have spawned
 caphtb startingpoint 1                # starting point by tier
 ```
 
 `machines` filters: `--retired/-r`, `--done/-D`, `--undone/-u`, `--os`,
-`--difficulty/-d`, `--todo` (HTB to-do list), `--search/-s`, `--limit/-n`.
+`--difficulty/-d`, `--todo` (HTB to-do list), `--search/-s`, `--min-rating`,
+`--limit/-n`. Sort with `--sort` (`rating`, `points`, `difficulty`, `name`,
+`user`, `root`; add `--asc` to reverse the order).
 
 ### VM lifecycle
 

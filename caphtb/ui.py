@@ -102,6 +102,23 @@ def diff_cell(text: Optional[str]) -> Text:
     return Text(text or "-", style=difficulty_style(text))
 
 
+def rating_cell(star: Optional[float]) -> Text:
+    """Render the community rating (0-5 stars) with a color hint."""
+    try:
+        value = float(star)
+    except (TypeError, ValueError):
+        return Text("-", style="muted")
+    if value >= 4.5:
+        style = "easy"
+    elif value >= 3.5:
+        style = "medium"
+    elif value >= 2.5:
+        style = "hard"
+    else:
+        style = "muted"
+    return Text(f"{value:.1f}", style=style)
+
+
 def os_short(os_name: Optional[str]) -> str:
     o = (os_name or "").lower()
     if "linux" in o:
@@ -175,6 +192,7 @@ def machines_table(machines: list[dict], title: str = "Machines") -> Table:
     table.add_column("Name", style="bold")
     table.add_column("OS")
     table.add_column("Difficulty")
+    table.add_column("Rating", justify="right")
     table.add_column("Pts", justify="right")
     table.add_column("User", justify="right", style="muted")
     table.add_column("Root", justify="right", style="muted")
@@ -187,6 +205,7 @@ def machines_table(machines: list[dict], title: str = "Machines") -> Table:
             m.get("name", "-"),
             os_short(m.get("os")),
             diff_cell(m.get("difficultyText") or m.get("difficulty")),
+            rating_cell(m.get("star")),
             str(m.get("points", m.get("static_points", "-"))),
             str(m.get("user_owns_count", "-")),
             str(m.get("root_owns_count", "-")),
