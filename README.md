@@ -15,6 +15,17 @@ country, team and university rankings.
 
 ---
 
+## TUI (`caphtb tui`)
+
+Full-screen dashboard with machines, challenges, Sherlocks, live blood watch
+and rankings. Press `t` to cycle between 7 color themes.
+
+![caphtb tui - machines](assets/tui-machines.png)
+
+![caphtb tui - ranking](assets/tui-ranking.png)
+
+---
+
 ## Quick install
 
 ```bash
