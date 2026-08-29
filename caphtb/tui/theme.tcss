@@ -41,7 +41,7 @@ Screen {
 #main {
     width: 1fr;
     background: $background;
-    padding: 1 2 0 2;
+    padding: 1 1 0 1;
 }
 
 #filters {
@@ -51,7 +51,7 @@ Screen {
 }
 
 #detail-pane {
-    width: 42;
+    width: 36;
     background: $background;
     padding: 1 2 0 2;
     border-left: solid $panel;
