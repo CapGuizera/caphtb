@@ -1,0 +1,208 @@
+/* Minimal single-frame layout: one outer border around the app, flat panels
+   separated by thin rules instead of nested boxes. All colors come from the
+   active theme (see CUSTOM_THEMES / THEME_CYCLE in app.py). */
+
+Screen {
+    background: $background;
+    color: $text;
+}
+
+#app-header {
+    dock: top;
+    height: 2;
+    background: $background;
+    padding: 1 2 0 2;
+}
+
+#header-title {
+    width: auto;
+    color: $primary;
+    text-style: bold;
+    padding-right: 3;
+}
+
+#header-user {
+    width: 1fr;
+    color: $secondary;
+    text-align: right;
+}
+
+#body {
+    height: 1fr;
+}
+
+#sidebar {
+    width: 24;
+    background: $background;
+    padding: 1 1 0 1;
+    border-right: solid $panel;
+}
+
+#main {
+    width: 1fr;
+    background: $background;
+    padding: 1 2 0 2;
+}
+
+#filters {
+    height: auto;
+    max-height: 6;
+    margin-bottom: 1;
+}
+
+#detail-pane {
+    width: 42;
+    background: $background;
+    padding: 1 2 0 2;
+    border-left: solid $panel;
+}
+
+#detail-pane.blood-alert {
+    border-left: solid $error;
+    color: $error;
+}
+
+.panel-title {
+    color: $secondary;
+    text-style: bold;
+    padding: 0 0 1 0;
+}
+
+#sections-list,
+#filters-list {
+    background: transparent;
+    border: none;
+}
+
+#filters-list {
+    height: auto;
+    max-height: 6;
+}
+
+.sidebar-item {
+    color: $text;
+}
+
+#sections-list > ListItem {
+    margin-bottom: 1;
+    padding: 0 1;
+}
+
+.filter-item {
+    color: $secondary;
+}
+
+ListView > ListItem {
+    background: transparent;
+}
+
+ListView > ListItem.-highlight {
+    background: $boost;
+    color: $primary;
+    text-style: bold;
+}
+
+#data-table {
+    height: 1fr;
+    margin: 0;
+    background: transparent;
+    border: none;
+    scrollbar-size-vertical: 1;
+    scrollbar-color: $panel;
+    scrollbar-color-hover: $boost;
+    scrollbar-color-active: $primary;
+    scrollbar-background: $background;
+    scrollbar-background-hover: $background;
+    scrollbar-background-active: $background;
+}
+
+DataTable > .datatable--header {
+    background: $background;
+    color: $primary;
+    text-style: bold;
+}
+
+DataTable > .datatable--cursor {
+    background: $boost;
+    color: $text;
+    text-style: bold;
+}
+
+
+#loading-panel {
+    height: 1fr;
+    background: transparent;
+    border: none;
+    color: $primary;
+    padding: 1 2;
+}
+
+.hidden {
+    display: none;
+}
+
+#status-line {
+    height: 1;
+    color: $secondary;
+    padding: 0 1;
+}
+
+#detail-body {
+    padding: 0 0 1 0;
+    color: $text;
+}
+
+#context-help {
+    dock: bottom;
+    height: 2;
+    background: $background;
+    color: $secondary;
+    padding: 0 1;
+    border-top: solid $panel;
+}
+
+#search-modal {
+    width: 62;
+    height: 7;
+    border: round $primary;
+    background: $surface;
+    padding: 1 2;
+}
+
+.search-title {
+    color: $primary;
+    margin-bottom: 1;
+}
+
+#confirm-modal,
+#flag-modal {
+    width: 62;
+    height: auto;
+    border: round $primary;
+    background: $surface;
+    padding: 1 2;
+}
+
+#flag-modal {
+    height: 11;
+}
+
+#modal-help {
+    color: $secondary;
+    margin-top: 1;
+}
+
+#modal-error {
+    color: $error;
+    margin-top: 1;
+}
+
+Input {
+    background: $background;
+    color: $text;
+    border: solid $panel;
+}
+
+Input:focus {
+    border: solid $primary;
+}

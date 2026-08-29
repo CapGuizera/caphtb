@@ -475,6 +475,27 @@ def challenge_submit(
 
 
 # ---------------------------------------------------------------------- #
+# TEXTUAL TUI
+# ---------------------------------------------------------------------- #
+@app.command()
+def tui():
+    """Open the full-screen Textual dashboard."""
+    try:
+        from .tui import run_tui
+    except ModuleNotFoundError as exc:
+        ui.err(
+            "Textual não está instalado. Rode: pip install textual"
+        )
+        raise typer.Exit(code=1) from exc
+
+    try:
+        run_tui()
+    except HTBError as exc:
+        ui.err(str(exc))
+        raise typer.Exit(code=1)
+
+
+# ---------------------------------------------------------------------- #
 # RANKING
 # ---------------------------------------------------------------------- #
 @app.command()

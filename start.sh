@@ -4,7 +4,7 @@
 # ------------------------------------
 # 1. Creates an isolated virtualenv in ./.venv (does not pollute the system).
 # 2. Installs the tool and its dependencies (typer, rich, requests).
-# 3. Forwards the arguments to the `caphtb` command.
+# 3. Forwards the arguments to the `caphtbcli` command.
 #
 # Usage:
 #   ./start.sh                 -> installs and shows the help
@@ -31,7 +31,7 @@ fi
 source "$VENV_DIR/bin/activate"
 
 # Install/update the tool quietly (editable mode).
-if ! python -c "import caphtb" >/dev/null 2>&1; then
+if ! python -c "import caphtbcli" >/dev/null 2>&1; then
     echo "[*] Installing dependencies and caphtb ..."
     pip install --quiet --upgrade pip
     pip install --quiet -e .
@@ -39,7 +39,7 @@ fi
 
 # No arguments: show the help. With arguments: forward them to caphtb.
 if [ "$#" -eq 0 ]; then
-    caphtb --help
+    caphtbcli --help
 else
-    caphtb "$@"
+    caphtbcli "$@"
 fi
